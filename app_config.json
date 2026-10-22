@@ -1,0 +1,32 @@
+{
+  "domain": "https://your-server.com",
+  "apiBaseUrl": "https://your-server.com",
+  "wsBaseUrl": "wss://your-servee.com",
+  "logo": "https://files.catbox.moe/racava-logo.png",
+  "qris_image": "https://files.catbox.moe/t14776.jpg",
+  "email": "racava.help@gmail.com",
+  "telegram": "https://t.me/racava_channel",
+  "whatsapp": "https://chat.whatsapp.com/racava",
+  "default_language": "id",
+  "default_currency": "IDR",
+  "images": {
+    "sender":         "https://files.catbox.moe/v4jldv.jpg",
+    "ddos":           "https://files.catbox.moe/j6j53u.jpg",
+    "rat":            "https://files.catbox.moe/af7r9a.jpg",
+    "bug":            "https://files.catbox.moe/ovah01.jpg",
+    "bonus_neon":     "https://files.catbox.moe/racava-neon.jpg",
+    "bonus_keychain": "https://files.catbox.moe/dxsx88.jpg",
+    "bonus_sticker":  "https://files.catbox.moe/k3jckk.jpg"
+  },
+  "packages": [
+    { "id": "1day",        "name": "1 Hari",      "price": 2000,   "days": 1,     "role": "member",   "icon": "sun",           "featured": false },
+    { "id": "1week",       "name": "1 Minggu",    "price": 14000,  "days": 7,     "role": "member",   "icon": "calendar",      "featured": false },
+    { "id": "1month",      "name": "1 Bulan",     "price": 40000,  "days": 30,    "role": "member",   "icon": "calendar-days", "featured": true  },
+    { "id": "full_update", "name": "Full Update", "price": 60000,  "days": 99999, "role": "member",   "icon": "refresh-cw",    "featured": false },
+    { "id": "reseller",    "name": "Reseller",    "price": 80000,  "days": 99999, "role": "reseller", "icon": "briefcase",     "featured": false },
+    { "id": "vip",         "name": "VIP",         "price": 100000, "days": 99999, "role": "vip",      "icon": "crown",         "featured": false },
+    { "id": "partner",     "name": "Partner",     "price": 150000, "days": 99999, "role": "partner",  "icon": "handshake",     "featured": false },
+    { "id": "staff",       "name": "Staff",       "price": 200000, "days": 99999, "role": "staff",    "icon": "shield",        "featured": false },
+    { "id": "owner",       "name": "Owner",       "price": 350000, "days": 99999, "role": "owner",    "icon": "gem",           "featured": true  }
+  ]
+}
