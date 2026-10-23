@@ -232,7 +232,6 @@ input, textarea { font-family: inherit; }
   z-index: 2;
 }
 
-/* HERO LOGO (replaces "Racava" text) */
 .hero-logo {
   max-width: min(90vw, 540px);
   max-height: 200px;
@@ -260,7 +259,6 @@ input, textarea { font-family: inherit; }
   pointer-events: none;
 }
 
-/* CTA BUTTON */
 .hero-cta { 
   position: relative;
   display: inline-flex; 
@@ -851,8 +849,7 @@ const CONFIG_SOURCES = [
 ];
 
 const DEFAULT_CONFIG = {
-  domain: 'https://your-server.com',
-  /* Logo diambil dari jsDelivr CDN (stabil). Fallback otomatis ke catbox jika gagal. */
+  domain: 'https://papsky.queen-official.com', // PERBAIKAN: Gunakan HTTPS agar tidak Mixed Content
   logo: 'https://cdn.jsdelivr.net/gh/ibnubaik29-svg/Racava-Remote@main/1792676289484.png',
   qris_image: 'https://files.catbox.moe/t14776.jpg',
   email: 'racava.help@gmail.com',
@@ -868,12 +865,12 @@ const DEFAULT_CONFIG = {
     { id:'1day',        name:'1 Hari',      price:2000,   days:1,     role:'member',   icon:'sun',           featured:false },
     { id:'1week',       name:'1 Minggu',    price:14000,  days:7,     role:'member',   icon:'calendar',      featured:false },
     { id:'1month',      name:'1 Bulan',     price:40000,  days:30,    role:'member',   icon:'calendar-days', featured:true  },
-    { id:'full_update', name:'Full Update', price:60000,  days:99999, role:'member',   icon:'rocket',    featured:false },
+    { id:'full_update', name:'Full Update', price:60000,  days:99999, role:'member',   icon:'rocket',        featured:false },
     { id:'reseller',    name:'Reseller',    price:80000,  days:99999, role:'reseller', icon:'briefcase',     featured:false },
-    { id:'vip',         name:'VIP',         price:100000, days:99999, role:'vip',      icon:'gem',         featured:false },
+    { id:'vip',         name:'VIP',         price:100000, days:99999, role:'vip',      icon:'gem',           featured:false },
     { id:'partner',     name:'Partner',     price:150000, days:99999, role:'partner',  icon:'handshake',     featured:false },
     { id:'staff',       name:'Staff',       price:200000, days:99999, role:'staff',    icon:'shield',        featured:false },
-    { id:'owner',       name:'Owner',       price:350000, days:99999, role:'owner',    icon:'crown',           featured:true  }
+    { id:'owner',       name:'Owner',       price:350000, days:99999, role:'owner',    icon:'crown',         featured:true  }
   ]
 };
 
@@ -1025,7 +1022,6 @@ function formatPrice(idr) {
   return `${sym} ${amount.toLocaleString('en-US', { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}`;
 }
 
-/* ---------- SMOOTH COUNTER ANIMATION ---------- */
 function animateNumber(el, target) {
   if (!el) return;
   const rawCurrent = parseInt(String(el.textContent).replace(/[^\d]/g, ''), 10);
@@ -1047,7 +1043,6 @@ function animateNumber(el, target) {
   requestAnimationFrame(tick);
 }
 
-/* ---------- REAL-TIME BUYER STATS ---------- */
 async function fetchBuyerStats() {
   const domain = (CONFIG.domain || '').replace(/\/$/, '');
   const el = document.getElementById('statBuyers');
@@ -1125,7 +1120,6 @@ function setCurrency(code) {
   if (currentPackage) updateSheetPrice();
 }
 
-/* ---------- RENDER MODULES ---------- */
 function renderModules() {
   const group = document.getElementById('modulesGroup');
   const mods = [
@@ -1164,7 +1158,6 @@ function renderModules() {
   if (window.lucide) lucide.createIcons();
 }
 
-/* ---------- RENDER PRICING ---------- */
 function renderPricing() {
   const grid = document.getElementById('pricingGrid');
   const pkgs = CONFIG.packages || [];
@@ -1186,7 +1179,6 @@ function renderPricing() {
   if (window.lucide) lucide.createIcons();
 }
 
-/* ---------- RENDER BONUS ---------- */
 function renderBonus() {
   const grid = document.getElementById('bonusGrid');
   const items = [
@@ -1210,7 +1202,6 @@ function renderBonus() {
   if (window.lucide) lucide.createIcons();
 }
 
-/* ---------- MODAL ---------- */
 function selectPackage(id) {
   const pkg = CONFIG.packages.find(p => p.id === id);
   if (!pkg) return;
@@ -1294,7 +1285,6 @@ function cancelPurchase() {
   showToast(t('toast.cancel'), 'x-circle');
 }
 
-/* ---------- UPLOAD ---------- */
 document.getElementById('uploadBlock').addEventListener('click', () => {
   document.getElementById('proofInput').click();
 });
@@ -1315,7 +1305,6 @@ document.getElementById('proofInput').addEventListener('change', function(e) {
   rd.readAsDataURL(f);
 });
 
-/* ---------- GENERATE CREDENTIALS ---------- */
 const ADJ = ['Cyber','Neon','Ghost','Shadow','Cosmic','Atomic','Quantum','Plasma','Vector','Cipher','Obsidian','Crimson','Silver','Chrome','Steel','Vivid','Luminous','Velvet','Turbo','Zenith','Nova','Apex','Zero','Pixel'];
 const NOUN = ['Raven','Wolf','Falcon','Panther','Viper','Hawk','Dragon','Fox','Tiger','Phoenix','Cobra','Lynx','Jaguar','Eagle','Shark','Puma','Condor','Osprey','Talon','Claw','Storm','Blade','Spark','Pulse'];
 const SYM = ['!','@','#','$','%','&','*','?','+','-','='];
@@ -1337,8 +1326,6 @@ function generateCredentials() {
   showToast(t('toast.generated'), 'sparkles');
 }
 
-/* ---------- SUBMIT ---------- */
-<!-- Cari fungsi submitPurchase di bagian <script> dan ganti dengan kode di bawah ini -->
 async function submitPurchase() {
   if (!currentPackage) return;
   const username = document.getElementById('accUsername').value.trim();
@@ -1363,9 +1350,8 @@ async function submitPurchase() {
   btn.innerHTML = `<span>${t('sheet.processing')}</span><i data-lucide="loader"></i>`;
   if (window.lucide) lucide.createIcons();
 
-  // Tambahkan AbortController untuk Timeout
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 45000); // 45 detik timeout
+  const timeoutId = setTimeout(() => controller.abort(), 60000);
 
   try {
     const domain = (CONFIG.domain || '').replace(/\/$/, '');
@@ -1393,7 +1379,7 @@ async function submitPurchase() {
     if (!res.ok) {
       const textRes = await res.text();
       console.error(`[FETCH ERROR] Status: ${res.status} | Response: ${textRes}`);
-      throw new Error(`HTTP Error ${res.status}`);
+      throw new Error(`Server merespons dengan status ${res.status}`);
     }
 
     const data = await res.json().catch(()=>({}));
@@ -1414,11 +1400,14 @@ async function submitPurchase() {
     }
   } catch (err) {
     clearTimeout(timeoutId);
-    if (err.name === 'AbortError') {
+    console.error('[SUBMIT ERROR]', err);
+    
+    if (err.message.includes('Failed to fetch') || err.name === 'TypeError') {
+      showToast('Koneksi diblokir browser (Mixed Content / CORS). Pastikan server menggunakan HTTPS.', 'alert-circle');
+    } else if (err.name === 'AbortError') {
       showToast('Koneksi timeout. Server terlalu lama merespons.', 'alert-circle');
     } else {
-      console.error(err);
-      showToast(t('toast.fail'), 'alert-circle');
+      showToast(err.message || t('toast.fail'), 'alert-circle');
     }
   } finally {
     btn.disabled = false;
@@ -1427,7 +1416,6 @@ async function submitPurchase() {
   }
 }
 
-/* ---------- TOAST ---------- */
 let toastTimer;
 function showToast(msg, icon) {
   const toast = document.getElementById('toast');
@@ -1439,10 +1427,9 @@ function showToast(msg, icon) {
   }
   toast.classList.add('show');
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => toast.classList.remove('show'), 3200);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 4000);
 }
 
-/* ---------- REVEAL ---------- */
 function initReveal() {
   const io = new IntersectionObserver(entries => {
     entries.forEach(e => {
@@ -1452,13 +1439,11 @@ function initReveal() {
   document.querySelectorAll('.reveal').forEach(el => io.observe(el));
 }
 
-/* ---------- APPLY CONFIG ---------- */
 function applyConfig() {
   if (CONFIG.logo) {
     const bLogo = document.getElementById('brandLogo');
     const hLogo = document.getElementById('heroLogo');
     const fLogo = document.getElementById('footerLogo');
-    /* Reset onerror handler so it always has chance to fallback */
     [bLogo, hLogo, fLogo].forEach(img => {
       if (!img) return;
       img.onerror = function() {
@@ -1481,7 +1466,6 @@ function scrollToPricing() {
   document.getElementById('pricing').scrollIntoView({ behavior:'smooth', block:'start' });
 }
 
-/* ---------- INIT ---------- */
 async function init() {
   if (window.lucide) lucide.createIcons();
 
