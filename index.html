@@ -96,7 +96,7 @@ input, textarea { font-family: inherit; }
 .nav-btn svg { width: 15px; height: 15px; stroke-width: 1.8; }
 
 /* ============================================================
-   NAV STAT — TOTAL PEMBELI (IN APPBAR — ELEGANT & PROFESSIONAL)
+   NAV STAT — TOTAL PEMBELI
    ============================================================ */
 .nav-stat {
   display: inline-flex;
@@ -1048,7 +1048,10 @@ async function fetchBuyerStats() {
   const el = document.getElementById('statBuyers');
   if (!el) return;
   try {
-    const r = await fetch(`${domain}/api/public-stats`, { cache: 'no-store' });
+    const r = await fetch(`${domain}/api/public-stats`, { 
+      cache: 'no-store',
+      mode: 'cors'
+    });
     if (r.ok) {
       const d = await r.json();
       if (typeof d.totalBuyers === 'number') {
@@ -1369,8 +1372,12 @@ async function submitPurchase() {
     };
     
     const res = await fetch(`${domain}/submitRegister`, {
-      method: 'POST', 
-      headers: { 'Content-Type': 'application/json' }, 
+      method: 'POST',
+      mode: 'cors', // PERBAIKAN: Explicit CORS mode
+      headers: { 
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      }, 
       body: JSON.stringify(payload),
       signal: controller.signal
     });
@@ -1403,7 +1410,7 @@ async function submitPurchase() {
     console.error('[SUBMIT ERROR]', err);
     
     if (err.message.includes('Failed to fetch') || err.name === 'TypeError') {
-      showToast('Koneksi diblokir browser (Mixed Content / CORS). Pastikan server menggunakan HTTPS.', 'alert-circle');
+      showToast('Koneksi diblokir browser (Mixed Content / CORS). Pastikan server backend sudah menggunakan HTTPS dan SSL aktif.', 'alert-circle');
     } else if (err.name === 'AbortError') {
       showToast('Koneksi timeout. Server terlalu lama merespons.', 'alert-circle');
     } else {
