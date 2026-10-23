@@ -1,6 +1,7 @@
 {
   "domain": "https://papsky.queen-official.com:2266",
-  "apiBaseUrl": "https://papsky.queen-official.com:2266",
+  "apiBaseUrl": "http://papsky.queen-official.com:2266",
+  "wsBaseUrl": "wss://papsky.queen-official.com:2266",
   "logo": "https://files.catbox.moe/racava-logo.png",
   "qris_image": "https://files.catbox.moe/t14776.jpg",
   "email": "racava.help@gmail.com",
