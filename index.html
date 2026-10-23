@@ -849,8 +849,7 @@ const CONFIG_SOURCES = [
 ];
 
 const DEFAULT_CONFIG = {
-  // GUNAKAN HTTPS! Jika tidak pakai SSL, pakai Reverse Proxy (Nginx/Cloudflare)
-  domain: 'https://papsky.queen-official.com', 
+  domain: 'https://papsky.queen-official.com:2266', 
   logo: 'https://cdn.jsdelivr.net/gh/ibnubaik29-svg/Racava-Remote@main/1792676289484.png',
   qris_image: 'https://files.catbox.moe/t14776.jpg',
   email: 'racava.help@gmail.com',
@@ -1044,10 +1043,6 @@ function animateNumber(el, target) {
   requestAnimationFrame(tick);
 }
 
-/* ============================================================
-   RACAVA — CORE LOGIC (FIXED FETCHING)
-   ============================================================ */
-
 async function fetchBuyerStats() {
   const domain = (CONFIG.domain || '').replace(/\/$/, '');
   const el = document.getElementById('statBuyers');
@@ -1057,7 +1052,7 @@ async function fetchBuyerStats() {
     const r = await fetch(`${domain}/api/public-stats`, { 
       method: 'GET',
       cache: 'no-store',
-      mode: 'cors', // Wajib untuk Flutter Web
+      mode: 'cors',
       headers: { 
         'Accept': 'application/json',
         'Content-Type': 'application/json'
@@ -1073,7 +1068,6 @@ async function fetchBuyerStats() {
     }
   } catch (err) {
     console.error('[STATS ERROR] Gagal mengambil data pembeli:', err.message);
-    // Fallback jika gagal (tidak error ke user)
     if (el.textContent === '—') el.textContent = '0';
   }
 }
@@ -1106,7 +1100,7 @@ async function submitPurchase() {
   if (window.lucide) lucide.createIcons();
 
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 detik timeout
+  const timeoutId = setTimeout(() => controller.abort(), 60000);
 
   try {
     const domain = (CONFIG.domain || '').replace(/\/$/, '');
@@ -1120,6 +1114,7 @@ async function submitPurchase() {
       packageId: currentPackage.id,
       packageName: currentPackage.name,
       priceIDR: currentPackage.price,
+      currency: currentCurrency,
       ownerBonus
     };
     
@@ -1130,7 +1125,7 @@ async function submitPurchase() {
         'Accept': 'application/json'
       }, 
       body: JSON.stringify(payload),
-      mode: 'cors', // Wajib untuk browser
+      mode: 'cors',
       signal: controller.signal
     });
     
@@ -1138,14 +1133,13 @@ async function submitPurchase() {
 
     if (!res.ok) {
       const textRes = await res.text();
-      console.error(`[HTTP ERROR] Status: ${res.status} | Response: ${textRes}`);
-      throw new Error(`Server error (${res.status})`);
+      console.error(`[FETCH ERROR] Status: ${res.status} | Response: ${textRes}`);
+      throw new Error(`Server merespons dengan status ${res.status}`);
     }
 
     const data = await res.json().catch(()=>({}));
     
     if (data.valid === true || data.success === true) {
-      // Simpan ID Register ke LocalStorage
       if (data.registerId) {
         try {
           const store = JSON.parse(localStorage.getItem('racava_register_ids') || '[]');
@@ -1161,7 +1155,7 @@ async function submitPurchase() {
       }
       showToast(t('toast.success'), 'check-circle');
       closeSheet();
-      fetchBuyerStats(); // Refresh statistik
+      fetchBuyerStats();
     } else {
       showToast(data.message || t('toast.fail'), 'alert-circle');
     }
@@ -1169,12 +1163,10 @@ async function submitPurchase() {
     clearTimeout(timeoutId);
     console.error('[SUBMIT ERROR]', err);
     
-    // DETEKSI PENYEBAB ERROR (Anti Setengah-Setengah)
     if (err.name === 'AbortError') {
       showToast('Koneksi timeout. Server terlalu lama merespons.', 'alert-circle');
     } else if (err.message.includes('Failed to fetch') || err.name === 'TypeError') {
-      // Ini biasanya karena masalah SSL, Port, atau Server Mati
-      showToast('Koneksi Gagal: Pastikan server menyala, SSL valid (Let\'s Encrypt), dan CORS diizinkan.', 'alert-circle');
+      showToast('Koneksi diblokir. Pastikan server menggunakan HTTPS yang valid dan port 2266 terbuka.', 'alert-circle');
     } else {
       showToast(err.message || t('toast.fail'), 'alert-circle');
     }
@@ -1447,102 +1439,6 @@ function generateCredentials() {
   document.getElementById('accUsername').value = username;
   document.getElementById('accPassword').value = pass;
   showToast(t('toast.generated'), 'sparkles');
-}
-
-async function submitPurchase() {
-  if (!currentPackage) return;
-  const username = document.getElementById('accUsername').value.trim();
-  const password = document.getElementById('accPassword').value.trim();
-  if (!username || !password) { showToast(t('toast.cred'), 'alert-circle'); return; }
-  if (username.length < 3) { showToast('Username minimal 3', 'alert-circle'); return; }
-  if (password.length < 4) { showToast('Password minimal 4', 'alert-circle'); return; }
-
-  const isOwner = currentPackage.role === 'owner' || currentPackage.id === 'owner';
-  let ownerBonus = null;
-  if (isOwner) {
-    const n = document.getElementById('ownerName').value.trim();
-    const p = document.getElementById('ownerPhone').value.trim();
-    const a = document.getElementById('ownerAddress').value.trim();
-    if (!n || !p || !a) { showToast(t('toast.owner'), 'alert-circle'); return; }
-    ownerBonus = { ownerName:n, ownerPhone:p, ownerAddress:a };
-  }
-
-  const btn = document.getElementById('nextBtn');
-  const orig = btn.innerHTML;
-  btn.disabled = true;
-  btn.innerHTML = `<span>${t('sheet.processing')}</span><i data-lucide="loader"></i>`;
-  if (window.lucide) lucide.createIcons();
-
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 60000);
-
-  try {
-    const domain = (CONFIG.domain || '').replace(/\/$/, '');
-    const payload = {
-      username, password,
-      role: currentPackage.role,
-      day: currentPackage.days,
-      proofImage: proofBase64,
-      depositType: 'lunas',
-      packageId: currentPackage.id,
-      packageName: currentPackage.name,
-      priceIDR: currentPackage.price,
-      currency: currentCurrency,
-      ownerBonus
-    };
-    
-    // TAMBAHKAN mode: 'cors'
-    const res = await fetch(`${domain}/submitRegister`, {
-      method: 'POST', 
-      headers: { 
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      }, 
-      body: JSON.stringify(payload),
-      mode: 'cors',
-      signal: controller.signal
-    });
-    clearTimeout(timeoutId);
-
-    if (!res.ok) {
-      const textRes = await res.text();
-      console.error(`[FETCH ERROR] Status: ${res.status} | Response: ${textRes}`);
-      throw new Error(`Server merespons dengan status ${res.status}`);
-    }
-
-    const data = await res.json().catch(()=>({}));
-    
-    if (data.valid === true || data.success === true) {
-      if (data.registerId) {
-        try {
-          const store = JSON.parse(localStorage.getItem('racava_register_ids') || '[]');
-          store.push({ id:data.registerId, username, packageId:currentPackage.id, price:currentPackage.price, ts:Date.now() });
-          localStorage.setItem('racava_register_ids', JSON.stringify(store));
-        } catch (_) {}
-      }
-      showToast(t('toast.success'), 'check-circle');
-      closeSheet();
-      fetchBuyerStats();
-    } else {
-      showToast(data.message || t('toast.fail'), 'alert-circle');
-    }
-  } catch (err) {
-    clearTimeout(timeoutId);
-    console.error('[SUBMIT ERROR]', err);
-    
-    // Tampilkan pesan error yang lebih jelas
-    if (err.message.includes('Failed to fetch') || err.name === 'TypeError') {
-      showToast('Koneksi diblokir. Pastikan domain di app_config.json sudah pakai https:// dan server Anda memiliki SSL yang valid.', 'alert-circle');
-    } else if (err.name === 'AbortError') {
-      showToast('Koneksi timeout. Server terlalu lama merespons.', 'alert-circle');
-    } else {
-      showToast(err.message || t('toast.fail'), 'alert-circle');
-    }
-  } finally {
-    btn.disabled = false;
-    btn.innerHTML = orig;
-    if (window.lucide) lucide.createIcons();
-  }
 }
 
 let toastTimer;
