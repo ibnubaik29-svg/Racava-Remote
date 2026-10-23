@@ -1338,6 +1338,7 @@ function generateCredentials() {
 }
 
 /* ---------- SUBMIT ---------- */
+<!-- Cari fungsi submitPurchase di bagian <script> dan ganti dengan kode di bawah ini -->
 async function submitPurchase() {
   if (!currentPackage) return;
   const username = document.getElementById('accUsername').value.trim();
@@ -1362,6 +1363,10 @@ async function submitPurchase() {
   btn.innerHTML = `<span>${t('sheet.processing')}</span><i data-lucide="loader"></i>`;
   if (window.lucide) lucide.createIcons();
 
+  // Tambahkan AbortController untuk Timeout
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 45000); // 45 detik timeout
+
   try {
     const domain = (CONFIG.domain || '').replace(/\/$/, '');
     const payload = {
@@ -1376,10 +1381,23 @@ async function submitPurchase() {
       currency: currentCurrency,
       ownerBonus
     };
+    
     const res = await fetch(`${domain}/submitRegister`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+      method: 'POST', 
+      headers: { 'Content-Type': 'application/json' }, 
+      body: JSON.stringify(payload),
+      signal: controller.signal
     });
+    clearTimeout(timeoutId);
+
+    if (!res.ok) {
+      const textRes = await res.text();
+      console.error(`[FETCH ERROR] Status: ${res.status} | Response: ${textRes}`);
+      throw new Error(`HTTP Error ${res.status}`);
+    }
+
     const data = await res.json().catch(()=>({}));
+    
     if (data.valid === true || data.success === true) {
       if (data.registerId) {
         try {
@@ -1395,8 +1413,13 @@ async function submitPurchase() {
       showToast(data.message || t('toast.fail'), 'alert-circle');
     }
   } catch (err) {
-    console.error(err);
-    showToast(t('toast.fail'), 'alert-circle');
+    clearTimeout(timeoutId);
+    if (err.name === 'AbortError') {
+      showToast('Koneksi timeout. Server terlalu lama merespons.', 'alert-circle');
+    } else {
+      console.error(err);
+      showToast(t('toast.fail'), 'alert-circle');
+    }
   } finally {
     btn.disabled = false;
     btn.innerHTML = orig;
