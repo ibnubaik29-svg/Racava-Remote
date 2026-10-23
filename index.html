@@ -96,7 +96,7 @@ input, textarea { font-family: inherit; }
 .nav-btn svg { width: 15px; height: 15px; stroke-width: 1.8; }
 
 /* ============================================================
-   NAV STAT — TOTAL PEMBELI
+   NAV STAT — TOTAL PEMBELI (IN APPBAR — ELEGANT & PROFESSIONAL)
    ============================================================ */
 .nav-stat {
   display: inline-flex;
@@ -849,7 +849,8 @@ const CONFIG_SOURCES = [
 ];
 
 const DEFAULT_CONFIG = {
-  domain: 'https://papsky.queen-official.com', // PERBAIKAN: Gunakan HTTPS agar tidak Mixed Content
+  // GUNAKAN HTTPS! Jika tidak pakai SSL, pakai Reverse Proxy (Nginx/Cloudflare)
+  domain: 'https://papsky.queen-official.com', 
   logo: 'https://cdn.jsdelivr.net/gh/ibnubaik29-svg/Racava-Remote@main/1792676289484.png',
   qris_image: 'https://files.catbox.moe/t14776.jpg',
   email: 'racava.help@gmail.com',
@@ -1048,9 +1049,11 @@ async function fetchBuyerStats() {
   const el = document.getElementById('statBuyers');
   if (!el) return;
   try {
+    // Tambahkan mode: 'cors'
     const r = await fetch(`${domain}/api/public-stats`, { 
       cache: 'no-store',
-      mode: 'cors'
+      mode: 'cors',
+      headers: { 'Accept': 'application/json' }
     });
     if (r.ok) {
       const d = await r.json();
@@ -1371,14 +1374,15 @@ async function submitPurchase() {
       ownerBonus
     };
     
+    // TAMBAHKAN mode: 'cors'
     const res = await fetch(`${domain}/submitRegister`, {
-      method: 'POST',
-      mode: 'cors', // PERBAIKAN: Explicit CORS mode
+      method: 'POST', 
       headers: { 
         'Content-Type': 'application/json',
         'Accept': 'application/json'
       }, 
       body: JSON.stringify(payload),
+      mode: 'cors',
       signal: controller.signal
     });
     clearTimeout(timeoutId);
@@ -1409,8 +1413,9 @@ async function submitPurchase() {
     clearTimeout(timeoutId);
     console.error('[SUBMIT ERROR]', err);
     
+    // Tampilkan pesan error yang lebih jelas
     if (err.message.includes('Failed to fetch') || err.name === 'TypeError') {
-      showToast('Koneksi diblokir browser (Mixed Content / CORS). Pastikan server backend sudah menggunakan HTTPS dan SSL aktif.', 'alert-circle');
+      showToast('Koneksi diblokir. Pastikan domain di app_config.json sudah pakai https:// dan server Anda memiliki SSL yang valid.', 'alert-circle');
     } else if (err.name === 'AbortError') {
       showToast('Koneksi timeout. Server terlalu lama merespons.', 'alert-circle');
     } else {
